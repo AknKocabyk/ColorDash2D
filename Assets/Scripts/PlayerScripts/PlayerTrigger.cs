@@ -1,20 +1,30 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
+
 
 public class PlayerTrigger : MonoBehaviour
 {
-    private SpriteRenderer playerSpriteRenderer;
+    // Karakterin SpriteRenderer bileşeni.
+    private SpriteRenderer spriteRenderer;
 
-    private Color[] colors = { Color.red, Color.blue, Color.green, Color.yellow };
+    // Kullanılacak renkler.
+    private Color[] colors = { Color.red, Color.green, Color.blue};
 
     // Şu anki renk indeksini tutar.
     private int currentColorIndex = 0;
+
+    [SerializeField] Image timerImage;
+    [SerializeField] float time = 100;
+
     void Start()
     {
-        playerSpriteRenderer = GetComponent<SpriteRenderer>();
+        // Karakterin SpriteRenderer bileşenini alıyoruz.
+        spriteRenderer = GetComponent<SpriteRenderer>();
 
-        playerSpriteRenderer.color = colors[currentColorIndex];
+        // Başlangıç rengi olarak ilk rengi ayarlıyoruz.
+        spriteRenderer.color = colors[currentColorIndex];
     }
 
     void Update()
@@ -25,20 +35,30 @@ public class PlayerTrigger : MonoBehaviour
             // Bir sonraki renge geçiyoruz.
             currentColorIndex = (currentColorIndex + 1) % colors.Length;
 
-            // Objenin rengini güncelliyoruz.
-            playerSpriteRenderer.color = colors[currentColorIndex];
+            // Karakterin rengini güncelliyoruz.
+            spriteRenderer.color = colors[currentColorIndex];
         }
+
+        time -= Time.deltaTime;
+        float fillpercent = time / 3;
+        timerImage.fillAmount = fillpercent;
+
     }
 
-    private void OnCollisionEnter2D(Collision2D collision)
+    void OnCollisionEnter2D(Collision2D collision)
     {
         SpriteRenderer otherSpriteRenderer = collision.gameObject.GetComponent<SpriteRenderer>();
-
-        // Eğer çarpışılan obje bir SpriteRenderer içeriyorsa ve rengi objemizin rengiyle aynıysa
-        if (otherSpriteRenderer != null && playerSpriteRenderer.color == otherSpriteRenderer.color)
+        print(otherSpriteRenderer.color);
+        // Eğer çarpışılan obje bir SpriteRenderer içeriyorsa ve rengi karakterin rengiyle aynıysa
+        if (otherSpriteRenderer != null && spriteRenderer.color == otherSpriteRenderer.color)
         {
-            // Objeyi engelden geçiriyoruz.
-            Physics2D.IgnoreCollision(collision.collider, GetComponent<Collider2D>());
+            // Çarpışmayı yok sayıyoruz, böylece karakter engelden geçebiliyor.
+            //Physics2D.IgnoreCollision(collision.collider, GetComponent<Collider2D>(), true);
+            collision.gameObject.GetComponent<Collider2D>().isTrigger = true;
+            otherSpriteRenderer.color = Color.white;
+
+
         }
     }
+
 }
